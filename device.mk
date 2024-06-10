@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-LOCAL_PATH := device/xiaomi/munch
+LOCAL_PATH := device/realme/spartan
 
 # API
 PRODUCT_TARGET_VNDK_VERSION := 30

@@ -6,7 +6,7 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/twrp_munch.mk
+    $(LOCAL_DIR)/twrp_RMX3371.mk
 
 COMMON_LUNCH_CHOICES := \
-    twrp_munch-eng
+    twrp_RMX3371-eng

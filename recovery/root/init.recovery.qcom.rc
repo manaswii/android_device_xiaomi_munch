@@ -25,55 +25,39 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-# Qcom TWRP Default Decryption
-import /init.recovery.qcom_decrypt.rc
-
 on init
     write /sys/class/backlight/panel0-backlight/brightness 200
+    setprop sys.usb.configfs 1
+    #ifdef VENDO_EDIT
+    #Shuangquan.du@PSW.AD.Recovery.0, 2019/08/22, Add for fastbood in recovery mode
+    mkdir /config/usb_gadget/g1/functions/ffs.fastboot
+    #endif
 
 on property:ro.boot.usbcontroller=*
     setprop sys.usb.controller ${ro.boot.usbcontroller}
-    # write /sys/class/udc/${ro.boot.usbcontroller}/device/../mode peripheral
+    #ifdef OPLUS_FEATURE_OTAPACKAGE_UPDATER
+    #Shuangquan.du@PSW.AD.Recovery.0, 2020/08/17, Add for otg flash
+    #write /sys/class/udc/${ro.boot.usbcontroller}/device/../mode peripheral
+    #endif /*OPLUS_FEATURE_OTAPACKAGE_UPDATER*/
 
 on fs
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
     symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
-    # vibrator
-    chown system system /sys/bus/i2c/drivers/aw8697_haptic/2-005a/f0_save
-    chown system system /sys/bus/i2c/drivers/aw8697_haptic/2-005a/osc_save
-    chown system system /sys/bus/i2c/drivers/aw8697_haptic/3-005a/osc_save
-    chown system system /sys/bus/i2c/drivers/aw8697_haptic/2-005a/custom_wave
-    chmod 0666  /sys/bus/i2c/drivers/aw8697_haptic/2-005a/custom_wave
-    chown system system /sys/bus/i2c/drivers/aw8697_haptic/2-005a/custom_wave
-    chmod 0666  /sys/bus/i2c/drivers/aw8697_haptic/2-005a/custom_wave
-    chown system system /sys/bus/i2c/drivers/aw8697_haptic/3-005a/custom_wave
-    chmod 0666  /sys/bus/i2c/drivers/aw8697_haptic/3-005a/custom_wave
-    chmod 0666 /sys/class/qcom-haptics/lra_calibration
-    chown system system /sys/bus/i2c/drivers/aw8697_haptic/0-005a/custom_wave
-    chmod 0666  /sys/bus/i2c/drivers/aw8697_haptic/0-005a/custom_wave
-    chmod 0666 /sys/class/qcom-haptics/lra_impedance
-    chown system system /sys/bus/i2c/drivers/awinic_haptic/3-005a/f0_save
-    chown system system /sys/bus/i2c/drivers/awinic_haptic/3-005a/osc_save
-    chown system system /sys/bus/i2c/drivers/awinic_haptic/3-005a/custom_wave
-    chmod 0666  /sys/bus/i2c/drivers/awinic_haptic/3-005a/custom_wave
-    chown system system /sys/bus/i2c/drivers/awinic_haptic/3-005a/f0_value
-    chmod 0666  /sys/bus/i2c/drivers/awinic_haptic/3-005a/f0_value
-    chown system system /sys/bus/i2c/drivers/awinic_haptic/3-005a/nv_flag
-    chmod 0666  /sys/bus/i2c/drivers/awinic_haptic/3-005a/nv_flag
-    chmod 0666  /sys/bus/i2c/drivers/aw8697_haptic/5-005a/custom_wave
-    chmod 0666  /sys/bus/i2c/drivers/awinic_haptic/5-005a/custom_wave
 
-service vibratorfeature-hal-service /vendor/bin/hw/vendor.xiaomi.hardware.vibratorfeature.service
-    class hal
-    user system
-    group system input
-    seclabel u:r:recovery:s0
-    onrestart restart vibratorfeature
+#ifdef OPLUS_FEATURE_OTAPACKAGE_UPDATER
+#Shuangquan.du@PSW.AD.Recovery.0, 2020/08/17, Add for otg flash
+on property:ro.boot.usbconfigfs=false
+   setprop sys.usb.configfs 0
 
-on post-fs
-    start boot-hal-1-1
+on property:ro.boot.recover_usb=*
+    write /sys/bus/platform/devices/a600000.ssusb/mode "peripheral"
 
-on boot
-    start health-hal-2-1
-    start vibratorfeature-hal-service
-    
+on property:sys.usb.ffs.ready=1
+    mkdir /config/usb_gadget/g1/configs/b.1 0777 shell shell
+    symlink /config/usb_gadget/g1/configs/b.1 /config/usb_gadget/g1/os_desc/b.1
+    mkdir /config/usb_gadget/g1/configs/b.1/strings/0x409 0770 shell shell
+    write /config/usb_gadget/g1/configs/b.1/strings/0x409/configuration "adb"
+    symlink /config/usb_gadget/g1/functions/ffs.adb /config/usb_gadget/g1/configs/b.1/f1
+    write /config/usb_gadget/g1/UDC ${sys.usb.controller}
+#endif /*OPLUS_FEATURE_OTAPACKAGE_UPDATER*/
+
